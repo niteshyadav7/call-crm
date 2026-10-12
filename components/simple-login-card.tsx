@@ -71,8 +71,8 @@ export function SimpleLoginCard() {
   };
 
   return (
-    <div className="w-full max-w-[400px] mx-auto bg-white rounded-2xl p-8 sm:p-10 shadow-2xl relative transition-all">
-      {/* Title with bold blue accent bar matching screenshot */}
+    <div className="w-full max-w-[400px] mx-auto bg-white rounded-2xl p-6 sm:p-10 shadow-xl border border-slate-200/80 transition-all">
+      {/* Title with bold blue accent bar matching reference */}
       <div className="text-center mb-8">
         <h1 className="text-2xl sm:text-[26px] font-bold text-[#111827] tracking-tight">
           {isAdminPortal
@@ -84,7 +84,7 @@ export function SimpleLoginCard() {
             : "Customer Login"}
         </h1>
         {/* Bold blue underline accent bar */}
-        <div className="w-24 h-1 bg-[#1e3a8a] mx-auto mt-2.5 rounded-full" />
+        <div className="w-20 sm:w-24 h-1 bg-[#1e3a8a] mx-auto mt-2.5 rounded-full" />
       </div>
 
       {errorMessage && (
@@ -99,7 +99,7 @@ export function SimpleLoginCard() {
         type="button"
         disabled={isSubmitting}
         onClick={handleGoogleSignIn}
-        className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs font-medium text-slate-700 shadow-2xs transition-all active:scale-[0.99] disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2.5 min-h-[46px] py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs sm:text-sm font-medium text-slate-700 shadow-2xs transition-all active:scale-[0.99] disabled:opacity-50"
       >
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
           <path
@@ -123,7 +123,7 @@ export function SimpleLoginCard() {
       </button>
 
       {/* OR USE PASSWORD divider */}
-      <div className="relative my-7">
+      <div className="relative my-6 sm:my-7">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-slate-200" />
         </div>
@@ -133,7 +133,7 @@ export function SimpleLoginCard() {
       </div>
 
       {/* Email and Password Form */}
-      <form onSubmit={handleEmailSubmit} className="space-y-6">
+      <form onSubmit={handleEmailSubmit} className="space-y-5 sm:space-y-6">
         {/* Email Address */}
         <div className="relative">
           <User className="w-4 h-4 text-slate-400 absolute left-0 top-1/2 -translate-y-1/2" />
@@ -143,7 +143,7 @@ export function SimpleLoginCard() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
             required
-            className="w-full pl-8 pr-3 py-2 text-sm border-b border-slate-200 focus:border-[#1e3a8a] outline-none text-slate-900 placeholder-slate-400 bg-transparent transition-colors"
+            className="w-full pl-8 pr-3 py-2.5 text-sm border-b border-slate-200 focus:border-[#1e3a8a] outline-none text-slate-900 placeholder-slate-400 bg-transparent transition-colors"
           />
         </div>
 
@@ -157,12 +157,12 @@ export function SimpleLoginCard() {
             placeholder="Password"
             required
             minLength={6}
-            className="w-full pl-8 pr-8 py-2 text-sm border-b border-slate-200 focus:border-[#1e3a8a] outline-none text-slate-900 placeholder-slate-400 bg-transparent transition-colors"
+            className="w-full pl-8 pr-9 py-2.5 text-sm border-b border-slate-200 focus:border-[#1e3a8a] outline-none text-slate-900 placeholder-slate-400 bg-transparent transition-colors"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+            className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -172,7 +172,7 @@ export function SimpleLoginCard() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3 bg-[#1e3a8a] hover:bg-[#172554] active:scale-[0.99] text-white font-semibold rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full min-h-[46px] py-3 bg-[#1e3a8a] hover:bg-[#172554] active:scale-[0.99] text-white font-semibold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -185,14 +185,14 @@ export function SimpleLoginCard() {
       </form>
 
       {/* Footer link: Go to Customer Login / Go to Admin Login */}
-      <div className="mt-8 text-center space-y-2">
+      <div className="mt-7 sm:mt-8 text-center space-y-2">
         <button
           type="button"
           onClick={() => {
             setIsAdminPortal(!isAdminPortal);
             setErrorMessage(null);
           }}
-          className="text-xs text-slate-500 hover:text-slate-800 transition-colors"
+          className="text-xs text-slate-500 hover:text-slate-800 transition-colors py-1 block w-full"
         >
           {isAdminPortal ? "Go to Customer Login" : "Go to Admin Login"}
         </button>
