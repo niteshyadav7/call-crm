@@ -4,7 +4,7 @@
       "emailPassword": true,
       "googleSignIn": {
         "oAuthBrandDisplayName": "Call CRM",
-        "supportEmail": "work.thyp01@gmail.com",
+        "supportEmail": "superadmin@gmail.com",
         "authorizedRedirectUris": [
           "http://localhost"
         ]

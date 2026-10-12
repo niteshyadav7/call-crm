@@ -93,6 +93,5 @@ export const SYSTEM_ROLES: RoleDefinition[] = [
 
 // Initial bootstrap emails that automatically inherit superadmin
 export const BOOTSTRAP_SUPERADMIN_EMAILS = [
-  "work.thyp01@gmail.com",
-  "nitesh0709yadav@gmail.com",
+  "superadmin@gmail.com",
 ];
