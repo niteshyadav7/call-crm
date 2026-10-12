@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Call CRM",
+        "supportEmail": "work.thyp01@gmail.com",
+        "authorizedRedirectUris": [
+          "http://localhost"
+        ]
+      }
+    }
+  }
+}

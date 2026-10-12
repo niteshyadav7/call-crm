@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Models & RBAC Structure
+    // ===============================================================
+    //
+    // Collection: users/{userId}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (optional)
+    //   - displayName: string (optional)
+    //   - photoURL: string (optional)
+    //   - role: string (in ['superadmin', 'admin', 'manager', 'agent', 'customer'])
+    //   - status: string (in ['approved', 'pending', 'rejected'])
+    //   - approvedBy: string (optional)
+    //   - approvedAt: string (optional)
+    //   - updatedAt: timestamp (optional)
+    //
+    // Collection: roles/{roleId}
+    // Fields:
+    //   - name: string (required, 1-60 chars)
+    //   - description: string (optional)
+    //   - permissions: list of string
+    //
+    // Collection: leads/{leadId}
+    // Fields:
+    //   - name: string (required, 1-100 chars)
+    //   - phone: string (required, 5-30 chars)
+    //   - notes: string (optional, 0-1000 chars)
+    //   - status: string
+    //   - createdBy: string
+    //
+    // ===============================================================
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isBootstrapSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'work.thyp01@gmail.com' ||
+        request.auth.token.email == 'nitesh0709yadav@gmail.com'
+      );
+    }
+
+    function isSuperAdmin() {
+      return isBootstrapSuperAdmin() || (
+        isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin'
+      );
+    }
+
+    function isApprovedMember() {
+      return isSuperAdmin() || (
+        isAuthenticated() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved'
+      );
+    }
+
+    function isValidLead(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.phone is string && data.phone.size() >= 5 && data.phone.size() <= 30 &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+             data.createdBy is string;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      // Users can read their own profile, Super Admins can list and inspect all users
+      allow read: if isOwner(userId) || isSuperAdmin();
+
+      // Users can initialize their own doc; Super Admin can create any profile
+      allow create: if isOwner(userId) || isSuperAdmin();
+
+      // Super Admin can update any field (including role & status); User can update basic info
+      allow update: if isSuperAdmin() || (
+        isOwner(userId) &&
+        // Prevent normal users from self-promoting to superadmin or approving themselves
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status', 'approvedBy', 'approvedAt']))
+      );
+
+      // Superadmin can delete; user cannot delete other users
+      allow delete: if isSuperAdmin();
+    }
+
+    // Roles Collection: Readable by authenticated users, manageable only by SuperAdmin
+    match /roles/{roleId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isSuperAdmin();
+    }
+
+    // Leads Collection: Only approved members can create leads; Super Admin has full control
+    match /leads/{leadId} {
+      allow read: if isApprovedMember();
+      allow create: if isApprovedMember() && isValidLead(request.resource.data);
+      allow update: if isApprovedMember() && isValidLead(request.resource.data);
+      allow delete: if isSuperAdmin();
+    }
+
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
