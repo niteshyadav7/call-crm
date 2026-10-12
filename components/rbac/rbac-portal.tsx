@@ -212,7 +212,7 @@ export function RbacPortal() {
                   setCollapsed(!collapsed);
                 }
               }}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
               title="Toggle Sidebar"
             >
               <PanelLeft className="w-5 h-5" />
@@ -260,13 +260,13 @@ export function RbacPortal() {
             {/* Install App button */}
             <button
               onClick={() => alert("Call CRM PWA is available for installation")}
-              className="hidden xs:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold text-xs shadow-xs transition-all active:scale-95"
+              className="hidden xs:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-semibold text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>App</span>
             </button>
 
-            <button className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+            <button className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
               <Bell className="w-5 h-5" />
               {pendingUsers.length > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 animate-pulse ring-2 ring-white" />
@@ -289,7 +289,7 @@ export function RbacPortal() {
               </div>
               <button
                 onClick={claimSuperadminRole}
-                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg text-xs transition-colors shrink-0"
+                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg text-xs transition-colors shrink-0 cursor-pointer"
               >
                 Claim Super Admin (Dev)
               </button>
@@ -380,7 +380,7 @@ export function RbacPortal() {
                                   onChange={(e) =>
                                     handleChangeRole(u.uid, e.target.value as UserRole)
                                   }
-                                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-medium focus:outline-none focus:border-slate-400"
+                                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 font-medium focus:outline-none focus:border-slate-400 cursor-pointer"
                                 >
                                   {allRoles.map((r) => (
                                     <option key={r.id} value={r.id}>
@@ -420,7 +420,7 @@ export function RbacPortal() {
                                   {u.status !== "approved" && (
                                     <button
                                       onClick={() => handleApprove(u.uid)}
-                                      className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95"
+                                      className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 cursor-pointer"
                                     >
                                       Approve
                                     </button>
@@ -428,7 +428,7 @@ export function RbacPortal() {
                                   {u.status !== "rejected" && (
                                     <button
                                       onClick={() => handleReject(u.uid)}
-                                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95"
+                                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-2xs transition-all active:scale-95 cursor-pointer"
                                     >
                                       Reject
                                     </button>
@@ -465,7 +465,7 @@ export function RbacPortal() {
                 {isSuperAdmin && (
                   <button
                     onClick={() => setShowRoleModal(true)}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-[#febd1c] hover:bg-amber-400 text-black font-bold rounded-xl text-xs shadow-xs transition-all active:scale-95"
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[#febd1c] hover:bg-amber-400 text-black font-bold rounded-xl text-xs shadow-xs transition-all active:scale-95 cursor-pointer"
                   >
                     <Plus className="w-4 h-4 text-black" />
                     <span>Create Custom Role</span>
@@ -527,7 +527,7 @@ export function RbacPortal() {
                       </h3>
                       <button
                         onClick={() => setShowRoleModal(false)}
-                        className="text-slate-400 hover:text-slate-700 text-sm p-1"
+                        className="text-slate-400 hover:text-slate-700 text-sm p-1 cursor-pointer"
                       >
                         ✕
                       </button>
@@ -589,7 +589,7 @@ export function RbacPortal() {
                                       );
                                     }
                                   }}
-                                  className="mt-0.5"
+                                  className="mt-0.5 cursor-pointer"
                                 />
                                 <div>
                                   <p className="font-semibold text-slate-900">{perm.label}</p>
@@ -605,13 +605,13 @@ export function RbacPortal() {
                         <button
                           type="button"
                           onClick={() => setShowRoleModal(false)}
-                          className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-medium"
+                          className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-medium cursor-pointer"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-5 py-2.5 bg-[#febd1c] hover:bg-amber-400 text-black font-bold rounded-xl shadow-xs transition-all"
+                          className="px-5 py-2.5 bg-[#febd1c] hover:bg-amber-400 text-black font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
                         >
                           Save Role
                         </button>
@@ -670,7 +670,7 @@ export function RbacPortal() {
                 <div className="pt-2">
                   <button
                     onClick={claimSuperadminRole}
-                    className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                    className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
                   >
                     <Sparkles className="w-4 h-4" />
                     Claim Super Admin (Dev Mode)

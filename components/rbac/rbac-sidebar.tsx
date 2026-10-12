@@ -101,7 +101,7 @@ export function RbacSidebar({
             {/* Desktop Collapse Toggle */}
             <button
               onClick={onToggleCollapse}
-              className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
             >
               {collapsed ? (
@@ -154,7 +154,7 @@ export function RbacSidebar({
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
                   title={collapsed ? item.label : undefined}
-                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs transition-all ${
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs transition-all cursor-pointer ${
                     isActive
                       ? "bg-[#febd1c] text-black font-bold shadow-sm"
                       : "text-slate-300 hover:bg-white/10 hover:text-white font-medium"
@@ -205,7 +205,7 @@ export function RbacSidebar({
           <button
             onClick={() => setShowSignOutConfirm(true)}
             title={collapsed ? "Sign Out" : undefined}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors ${
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer ${
               collapsed ? "justify-center" : ""
             }`}
           >
@@ -226,7 +226,7 @@ export function RbacSidebar({
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowSignOutConfirm(false)}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -235,7 +235,7 @@ export function RbacSidebar({
                   setShowSignOutConfirm(false);
                   logout();
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm transition-colors cursor-pointer"
               >
                 Sign Out
               </button>

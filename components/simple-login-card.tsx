@@ -99,7 +99,7 @@ export function SimpleLoginCard() {
         type="button"
         disabled={isSubmitting}
         onClick={handleGoogleSignIn}
-        className="w-full flex items-center justify-center gap-2.5 min-h-[46px] py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs sm:text-sm font-medium text-slate-700 shadow-2xs transition-all active:scale-[0.99] disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2.5 min-h-[46px] py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-200 rounded-full text-xs sm:text-sm font-medium text-slate-700 shadow-2xs transition-all active:scale-[0.99] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
           <path
@@ -162,7 +162,7 @@ export function SimpleLoginCard() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1"
+            className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1 cursor-pointer"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -172,7 +172,7 @@ export function SimpleLoginCard() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full min-h-[46px] py-3 bg-[#1e3a8a] hover:bg-[#172554] active:scale-[0.99] text-white font-semibold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full min-h-[46px] py-3 bg-[#1e3a8a] hover:bg-[#172554] active:scale-[0.99] text-white font-semibold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -192,7 +192,7 @@ export function SimpleLoginCard() {
             setIsAdminPortal(!isAdminPortal);
             setErrorMessage(null);
           }}
-          className="text-xs text-slate-500 hover:text-slate-800 transition-colors py-1 block w-full"
+          className="text-xs text-slate-500 hover:text-slate-800 transition-colors py-1 block w-full cursor-pointer"
         >
           {isAdminPortal ? "Go to Customer Login" : "Go to Admin Login"}
         </button>
@@ -205,7 +205,7 @@ export function SimpleLoginCard() {
               setIsSignUp(!isSignUp);
               setErrorMessage(null);
             }}
-            className="font-semibold text-[#1e3a8a] hover:underline"
+            className="font-semibold text-[#1e3a8a] hover:underline cursor-pointer"
           >
             {isSignUp ? "Sign In" : "Register"}
           </button>
