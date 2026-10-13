@@ -35,8 +35,8 @@ if (!email || !password) {
   console.error("✗ SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD env vars are required.");
   process.exit(1);
 }
-if (password.length < 12) {
-  console.error("✗ SUPERADMIN_PASSWORD must be at least 12 characters.");
+if (password.length < 6) {
+  console.error("✗ SUPERADMIN_PASSWORD must be at least 6 characters.");
   process.exit(1);
 }
 

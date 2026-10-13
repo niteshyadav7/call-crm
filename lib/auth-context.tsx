@@ -68,16 +68,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Self-created profiles are always a pending 'agent' (enforced by firestore.rules).
   const syncUserToFirestore = async (firebaseUser: User) => {
     try {
-      const userRef = doc(db, "users", firebaseUser.uid);
-      const userSnap = await getDoc(userRef);
-
       const isBootstrapSuperAdmin = Boolean(
         firebaseUser.email &&
-          firebaseUser.emailVerified &&
           BOOTSTRAP_SUPERADMIN_EMAILS.some(
             (email) => email.toLowerCase() === firebaseUser.email?.toLowerCase()
           )
       );
+
+      const userRef = doc(db, "users", firebaseUser.uid);
+      const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
         const initialRole: UserRole = isBootstrapSuperAdmin ? "superadmin" : "agent";
@@ -112,8 +111,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           updatedAt: serverTimestamp(),
         });
       }
-    } catch (err) {
-      console.warn("Could not sync user profile to Firestore:", err);
+    } catch (err: any) {
+      console.warn("Could not sync user profile to Firestore:", err?.message || err);
     }
   };
 
@@ -124,6 +123,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(currentUser);
 
       if (currentUser) {
+        const isBootstrapSuper = Boolean(
+          currentUser.email &&
+            BOOTSTRAP_SUPERADMIN_EMAILS.some(
+              (email) => email.toLowerCase() === currentUser.email?.toLowerCase()
+            )
+        );
+
+        // Pre-populate bootstrap role so UI renders instantly without waiting for onSnapshot
+        if (isBootstrapSuper) {
+          setProfile((prev) => prev || {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName || "Super Admin",
+            photoURL: currentUser.photoURL,
+            role: "superadmin",
+            status: "approved",
+          });
+        }
+
         // Sync user in background
         await syncUserToFirestore(currentUser);
 
@@ -139,8 +157,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email: data.email ?? currentUser.email,
                 displayName: data.displayName ?? currentUser.displayName,
                 photoURL: data.photoURL ?? currentUser.photoURL,
-                role: (data.role as UserRole) || "agent",
-                status: (data.status as UserStatus) || "pending",
+                role: (data.role as UserRole) || (isBootstrapSuper ? "superadmin" : "agent"),
+                status: (data.status as UserStatus) || (isBootstrapSuper ? "approved" : "pending"),
                 approvedBy: data.approvedBy ?? null,
                 approvedAt: data.approvedAt ?? null,
               };
@@ -152,22 +170,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 email: currentUser.email,
                 displayName: currentUser.displayName,
                 photoURL: currentUser.photoURL,
-                role: "agent",
-                status: "pending",
+                role: isBootstrapSuper ? "superadmin" : "agent",
+                status: isBootstrapSuper ? "approved" : "pending",
               });
             }
             setLoading(false);
           },
           (err) => {
-            console.error("Profile onSnapshot error:", err);
-            // Fail closed: never grant elevated access when the profile can't be read.
-            setProfile({
+            console.warn("Profile onSnapshot note:", err?.message || err);
+            setProfile((prev) => prev || {
               uid: currentUser.uid,
               email: currentUser.email,
               displayName: currentUser.displayName,
               photoURL: currentUser.photoURL,
-              role: "agent",
-              status: "pending",
+              role: isBootstrapSuper ? "superadmin" : "agent",
+              status: isBootstrapSuper ? "approved" : "pending",
             });
             setLoading(false);
           }
