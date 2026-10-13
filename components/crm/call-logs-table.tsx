@@ -120,12 +120,12 @@ export function CallLogsTable({
   const selectedAgentObj = agents.find((a) => a.uid === agentFilter);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       {/* Active Agent Filter Pill (if drilled down) */}
       {agentFilter !== "all" && selectedAgentObj && (
-        <div className="flex items-center justify-between p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900">
+        <div className="flex items-center justify-between p-2.5 px-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900">
           <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-blue-600" />
+            <User className="w-3.5 h-3.5 text-blue-600" />
             <span>
               Showing call logs filtered for:{" "}
               <strong>{selectedAgentObj.displayName || selectedAgentObj.email}</strong>
@@ -143,58 +143,58 @@ export function CallLogsTable({
         </div>
       )}
 
-      {/* Stats Summary Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+      {/* Stats Summary Strip (Compact) */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5">
+        <div className="bg-white p-2.5 px-3 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
           <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
             Total Calls
           </span>
-          <span className="text-xl font-bold text-[#1a1c1c]">{stats.total}</span>
+          <span className="text-lg font-black text-[#1a1c1c]">{stats.total}</span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div className="bg-white p-2.5 px-3 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
           <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider block flex items-center gap-1">
             <PhoneIncoming className="w-3 h-3" /> Incoming
           </span>
-          <span className="text-xl font-bold text-emerald-700">{stats.incoming}</span>
+          <span className="text-lg font-black text-emerald-700">{stats.incoming}</span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div className="bg-white p-2.5 px-3 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
           <span className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider block flex items-center gap-1">
             <PhoneOutgoing className="w-3 h-3" /> Outgoing
           </span>
-          <span className="text-xl font-bold text-amber-700">{stats.outgoing}</span>
+          <span className="text-lg font-black text-amber-700">{stats.outgoing}</span>
         </div>
 
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div className="bg-white p-2.5 px-3 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
           <span className="text-[10px] font-semibold text-rose-600 uppercase tracking-wider block flex items-center gap-1">
             <PhoneMissed className="w-3 h-3" /> Missed
           </span>
-          <span className="text-xl font-bold text-rose-700">{stats.missed}</span>
+          <span className="text-lg font-black text-rose-700">{stats.missed}</span>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        <div className="col-span-2 sm:col-span-1 bg-white p-2.5 px-3 rounded-lg border border-slate-200/80 shadow-2xs flex items-center justify-between">
           <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block flex items-center gap-1">
             <Clock className="w-3 h-3" /> Talk Time
           </span>
-          <span className="text-xl font-bold text-[#1a1c1c]">
+          <span className="text-lg font-black text-[#1a1c1c]">
             {formatDuration(stats.totalDuration)}
           </span>
         </div>
       </div>
 
-      {/* Search & Filter Controls Bar */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      {/* Search & Filter Controls Bar (Compact) */}
+      <div className="bg-white border border-slate-200/80 rounded-xl p-2.5 sm:p-3 shadow-2xs space-y-2.5">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
           {/* Search Input */}
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search contact name, phone number, agent..."
-              className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1a1c1c]/10"
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1a1c1c]/10"
             />
           </div>
 
@@ -205,7 +205,7 @@ export function CallLogsTable({
               <select
                 value={agentFilter}
                 onChange={(e) => setAgentFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 font-medium focus:outline-none cursor-pointer"
+                className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-medium focus:outline-none cursor-pointer"
               >
                 <option value="all">All Team Agents ({agents.length})</option>
                 {agents.map((a) => (
@@ -217,10 +217,10 @@ export function CallLogsTable({
             )}
 
             {/* Call Type Filter */}
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
               <button
                 onClick={() => setTypeFilter(null)}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-2 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   typeFilter === null ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -228,7 +228,7 @@ export function CallLogsTable({
               </button>
               <button
                 onClick={() => setTypeFilter(1)}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-2 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   typeFilter === 1 ? "bg-emerald-600 text-white shadow-2xs" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -236,7 +236,7 @@ export function CallLogsTable({
               </button>
               <button
                 onClick={() => setTypeFilter(2)}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-2 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   typeFilter === 2 ? "bg-amber-500 text-black shadow-2xs" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -244,7 +244,7 @@ export function CallLogsTable({
               </button>
               <button
                 onClick={() => setTypeFilter(3)}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-2 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   typeFilter === 3 ? "bg-rose-600 text-white shadow-2xs" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -258,7 +258,7 @@ export function CallLogsTable({
               onChange={(e) =>
                 setSimFilter(e.target.value === "all" ? null : Number(e.target.value))
               }
-              className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs text-slate-700 font-medium focus:outline-none cursor-pointer"
+              className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-medium focus:outline-none cursor-pointer"
             >
               <option value="all">All Channels</option>
               <option value="0">SIM 1</option>
@@ -269,19 +269,19 @@ export function CallLogsTable({
         </div>
       </div>
 
-      {/* Call Logs Table */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+      {/* Call Logs Table (Compact High Density) */}
+      <div className="bg-white border border-slate-200/80 rounded-xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[750px]">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-400 font-semibold uppercase tracking-wider">
-                <th className="py-3 px-4">Contact & Phone</th>
-                <th className="py-3 px-4">Click to Call</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4">Duration</th>
-                <th className="py-3 px-4">SIM / Line</th>
-                <th className="py-3 px-4">Date & Time</th>
-                {isSuperAdmin && <th className="py-3 px-4">Agent</th>}
+              <tr className="bg-slate-50/80 border-b border-slate-100 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+                <th className="py-2.5 px-3.5">Contact & Phone</th>
+                <th className="py-2.5 px-3.5">Click to Call</th>
+                <th className="py-2.5 px-3.5">Type</th>
+                <th className="py-2.5 px-3.5">Duration</th>
+                <th className="py-2.5 px-3.5">SIM / Line</th>
+                <th className="py-2.5 px-3.5">Date & Time</th>
+                {isSuperAdmin && <th className="py-2.5 px-3.5">Agent</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -289,7 +289,7 @@ export function CallLogsTable({
                 <tr>
                   <td
                     colSpan={isSuperAdmin ? 7 : 6}
-                    className="py-12 text-center text-slate-400 italic"
+                    className="py-8 text-center text-slate-400 italic"
                   >
                     No call logs found matching your filters.
                   </td>
@@ -305,13 +305,13 @@ export function CallLogsTable({
                       className="hover:bg-slate-50/80 transition-colors group"
                     >
                       {/* Contact Name & Number */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700 shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700 shrink-0">
                             {(log.contactName?.[0] || log.number?.[0] || "?").toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-900">
+                            <p className="font-semibold text-slate-900 text-xs">
                               {log.contactName || "Unknown Contact"}
                             </p>
                             <p className="text-[11px] text-slate-500 font-mono">
@@ -322,15 +322,15 @@ export function CallLogsTable({
                       </td>
 
                       {/* Click to Call Action Button */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3.5">
                         <div className="flex items-center gap-1.5">
                           {/* Direct Phone Dial Link */}
                           <a
                             href={`tel:${cleanDigits}`}
                             title={`Click to call ${log.number} directly`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold text-xs shadow-2xs transition-all cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-semibold text-xs shadow-2xs transition-all cursor-pointer"
                           >
-                            <Phone className="w-3.5 h-3.5 fill-current" />
+                            <Phone className="w-3 h-3 fill-current" />
                             <span>Call</span>
                           </a>
 
@@ -340,7 +340,7 @@ export function CallLogsTable({
                             target="_blank"
                             rel="noopener noreferrer"
                             title="Chat on WhatsApp"
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-colors cursor-pointer"
+                            className="p-1 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-colors cursor-pointer"
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
                           </a>
@@ -349,21 +349,21 @@ export function CallLogsTable({
                           <button
                             onClick={() => copyNumber(log.id, log.number)}
                             title="Copy number"
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+                            className="p-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
                           >
                             {isCopied ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <Check className="w-3 h-3 text-emerald-600" />
                             ) : (
-                              <Copy className="w-3.5 h-3.5" />
+                              <Copy className="w-3 h-3" />
                             )}
                           </button>
                         </div>
                       </td>
 
                       {/* Call Type */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3.5">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                             log.type === 1
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                               : log.type === 2
@@ -383,13 +383,13 @@ export function CallLogsTable({
                       </td>
 
                       {/* Duration */}
-                      <td className="py-3.5 px-4 font-mono font-medium text-slate-700">
+                      <td className="py-2.5 px-3.5 font-mono font-medium text-slate-700 text-xs">
                         {formatDuration(log.duration)}
                       </td>
 
                       {/* SIM Slot / Channel */}
-                      <td className="py-3.5 px-4">
-                        <span className="text-[11px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium">
+                      <td className="py-2.5 px-3.5">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium">
                           {log.simSlot === 0
                             ? "SIM 1"
                             : log.simSlot === 1
@@ -401,13 +401,13 @@ export function CallLogsTable({
                       </td>
 
                       {/* Date & Time */}
-                      <td className="py-3.5 px-4 text-slate-600 text-[11px]">
+                      <td className="py-2.5 px-3.5 text-slate-600 text-[11px]">
                         {formatDateTime(log.timestamp)}
                       </td>
 
                       {/* Agent (for Superadmin) */}
                       {isSuperAdmin && (
-                        <td className="py-3.5 px-4">
+                        <td className="py-2.5 px-3.5">
                           <span className="font-semibold text-slate-800 text-xs">
                             {log.ownerName || log.ownerEmail || "Unknown Agent"}
                           </span>
