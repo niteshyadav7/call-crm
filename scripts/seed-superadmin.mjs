@@ -1,3 +1,16 @@
+/**
+ * Seeds (or re-syncs) the bootstrap Super Admin account.
+ *
+ * Credentials are NEVER stored in this file. Provide them via env vars:
+ *
+ *   PowerShell:
+ *     $env:SUPERADMIN_EMAIL="superadmin@gmail.com"; $env:SUPERADMIN_PASSWORD="<strong-password>"; node scripts/seed-superadmin.mjs
+ *
+ *   bash:
+ *     SUPERADMIN_EMAIL=superadmin@gmail.com SUPERADMIN_PASSWORD='<strong-password>' node scripts/seed-superadmin.mjs
+ *
+ * Firebase web config is read from NEXT_PUBLIC_FIREBASE_* env vars (same as the app).
+ */
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -7,20 +20,29 @@ import {
 import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAQ5Ciec9l9PnRg2Tex-_blGxkBU-zKglc",
-  authDomain: "call-crm-66927.firebaseapp.com",
-  projectId: "call-crm-66927",
-  storageBucket: "call-crm-66927.firebasestorage.app",
-  messagingSenderId: "55048843204",
-  appId: "1:55048843204:web:66f6e44315a996dd3cbe91",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyAQ5Ciec9l9PnRg2Tex-_blGxkBU-zKglc",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "call-crm-66927.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "call-crm-66927",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "call-crm-66927.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "55048843204",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:55048843204:web:66f6e44315a996dd3cbe91",
 };
+
+const email = process.env.SUPERADMIN_EMAIL;
+const password = process.env.SUPERADMIN_PASSWORD;
+
+if (!email || !password) {
+  console.error("✗ SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD env vars are required.");
+  process.exit(1);
+}
+if (password.length < 12) {
+  console.error("✗ SUPERADMIN_PASSWORD must be at least 12 characters.");
+  process.exit(1);
+}
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-
-const email = "superadmin@gmail.com";
-const password = "Nitesh@123";
 
 async function seed() {
   console.log(`Seeding SuperAdmin: ${email}...`);
@@ -64,7 +86,6 @@ async function seed() {
 
   console.log("\n🎉 SuperAdmin successfully seeded!");
   console.log(`Email: ${email}`);
-  console.log(`Password: ${password}`);
   process.exit(0);
 }
 

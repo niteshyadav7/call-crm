@@ -1,14 +1,11 @@
 {
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
   "auth": {
     "providers": {
-      "emailPassword": true,
-      "googleSignIn": {
-        "oAuthBrandDisplayName": "Call CRM",
-        "supportEmail": "superadmin@gmail.com",
-        "authorizedRedirectUris": [
-          "http://localhost"
-        ]
-      }
+      "emailPassword": true
     }
   }
 }

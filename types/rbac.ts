@@ -24,13 +24,32 @@ export interface UserProfile {
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
+  phone?: string | null;
   role: UserRole;
   status: UserStatus;
   customRoleId?: string;
   approvedBy?: string | null;
   approvedAt?: string | null;
+  lastSyncAt?: string | null;
+  totalSyncedCalls?: number;
   createdAt?: string | null;
   updatedAt?: string | null;
+}
+
+export interface SyncedCallLog {
+  id: string;
+  ownerUid: string;
+  ownerName: string;
+  ownerEmail: string;
+  number: string;
+  normalizedNumber?: string;
+  contactName: string;
+  type: number; // 1 = Incoming, 2 = Outgoing, 3 = Missed
+  duration: number; // in seconds
+  timestamp: number; // epoch ms
+  simSlot: number; // 0 = SIM 1, 1 = SIM 2, 2 = WhatsApp
+  isWhatsapp?: boolean;
+  syncedAt?: any;
 }
 
 export const SYSTEM_ROLES: RoleDefinition[] = [

@@ -43,8 +43,12 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Bootstrap only counts for a VERIFIED email, otherwise anyone who registers
+    // the address first (email/password accounts are unverified) would own the system.
     function isBootstrapSuperAdmin() {
-      return isAuthenticated() && request.auth.token.email == 'superadmin@gmail.com';
+      return isAuthenticated() &&
+             request.auth.token.email == 'superadmin@gmail.com' &&
+             request.auth.token.email_verified == true;
     }
 
     function isSuperAdmin() {
@@ -70,19 +74,50 @@ service cloud.firestore {
              data.createdBy is string;
     }
 
+    // Fields a user is allowed to have on their own profile document
+    function allowedProfileKeys() {
+      return ['uid', 'email', 'displayName', 'photoURL', 'phone',
+              'role', 'status', 'approvedBy', 'approvedAt', 'customRoleId',
+              'createdAt', 'updatedAt'];
+    }
+
+    // Fields only a Super Admin may change
+    function privilegedProfileKeys() {
+      return ['uid', 'role', 'status', 'approvedBy', 'approvedAt', 'customRoleId'];
+    }
+
+    function isValidSelfProfile(data, userId) {
+      return data.keys().hasOnly(allowedProfileKeys()) &&
+             data.uid == userId &&
+             (!('email' in data) || data.email == null || data.email == request.auth.token.email) &&
+             (!('displayName' in data) || data.displayName == null ||
+               (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('phone' in data) || data.phone == null ||
+               (data.phone is string && data.phone.size() <= 30));
+    }
+
     // Users Collection
     match /users/{userId} {
       // Users can read their own profile, Super Admins can list and inspect all users
       allow read: if isOwner(userId) || isSuperAdmin();
 
-      // Users can initialize their own doc; Super Admin can create any profile
-      allow create: if isOwner(userId) || isSuperAdmin();
+      // Super Admin can create any profile. A user may only self-create a
+      // PENDING 'agent' profile with no approval metadata (no self-promotion).
+      allow create: if isSuperAdmin() || (
+        isOwner(userId) &&
+        isValidSelfProfile(request.resource.data, userId) &&
+        request.resource.data.role == 'agent' &&
+        request.resource.data.status == 'pending' &&
+        request.resource.data.get('approvedBy', null) == null &&
+        request.resource.data.get('approvedAt', null) == null
+      );
 
       // Super Admin can update any field (including role & status); User can update basic info
       allow update: if isSuperAdmin() || (
         isOwner(userId) &&
+        isValidSelfProfile(request.resource.data, userId) &&
         // Prevent normal users from self-promoting to superadmin or approving themselves
-        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status', 'approvedBy', 'approvedAt']))
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(privilegedProfileKeys()))
       );
 
       // Superadmin can delete; user cannot delete other users
@@ -100,6 +135,32 @@ service cloud.firestore {
       allow read: if isApprovedMember();
       allow create: if isApprovedMember() && isValidLead(request.resource.data);
       allow update: if isApprovedMember() && isValidLead(request.resource.data);
+      allow delete: if isSuperAdmin();
+    }
+
+    // Call Logs Collection: Stores synced calls per agent
+    match /callLogs/{callLogId} {
+      // Agents can read only their own call logs; Super Admins can read all logs
+      allow read: if isSuperAdmin() || (
+        isAuthenticated() && resource.data.ownerUid == request.auth.uid
+      );
+
+      // Approved agents can upload call logs owned by themselves
+      allow create: if isSuperAdmin() || (
+        isApprovedMember() &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.number is string &&
+        request.resource.data.number.size() > 0
+      );
+
+      // Re-syncs / note edits: owner can update without changing ownerUid
+      allow update: if isSuperAdmin() || (
+        isAuthenticated() &&
+        resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.ownerUid == request.auth.uid
+      );
+
+      // Only Super Admin can delete call records
       allow delete: if isSuperAdmin();
     }
 

@@ -5,9 +5,7 @@ import {
   User,
   UserCredential,
   onAuthStateChanged,
-  signInWithPopup,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
 import {
@@ -18,7 +16,7 @@ import {
   onSnapshot,
   serverTimestamp,
 } from "firebase/firestore";
-import { auth, db, googleProvider } from "./firebase";
+import { auth, db } from "./firebase";
 import {
   UserProfile,
   UserRole,
@@ -39,11 +37,9 @@ interface AuthContextType {
   isApproved: boolean;
   canCreateCRM: boolean;
   hasPermission: (permission: Permission) => boolean;
-  signInWithGoogle: () => Promise<UserCredential>;
+  // Accounts are provisioned by a Super Admin; there is no self-service sign-up.
   signInWithEmail: (email: string, pass: string) => Promise<UserCredential>;
-  signUpWithEmail: (email: string, pass: string, requestedRole?: UserRole) => Promise<UserCredential>;
   logout: () => Promise<void>;
-  claimSuperadminRole: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -57,17 +53,10 @@ const AuthContext = createContext<AuthContextType>({
   isApproved: false,
   canCreateCRM: false,
   hasPermission: () => false,
-  signInWithGoogle: async () => {
-    throw new Error("AuthContext not initialized");
-  },
   signInWithEmail: async () => {
     throw new Error("AuthContext not initialized");
   },
-  signUpWithEmail: async () => {
-    throw new Error("AuthContext not initialized");
-  },
   logout: async () => {},
-  claimSuperadminRole: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -75,21 +64,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Sync user profile to Firestore users collection
-  const syncUserToFirestore = async (firebaseUser: User, requestedRole: UserRole = "agent") => {
+  // Sync user profile to Firestore users collection.
+  // Self-created profiles are always a pending 'agent' (enforced by firestore.rules).
+  const syncUserToFirestore = async (firebaseUser: User) => {
     try {
       const userRef = doc(db, "users", firebaseUser.uid);
       const userSnap = await getDoc(userRef);
 
       const isBootstrapSuperAdmin = Boolean(
         firebaseUser.email &&
+          firebaseUser.emailVerified &&
           BOOTSTRAP_SUPERADMIN_EMAILS.some(
             (email) => email.toLowerCase() === firebaseUser.email?.toLowerCase()
           )
       );
 
       if (!userSnap.exists()) {
-        const initialRole: UserRole = isBootstrapSuperAdmin ? "superadmin" : requestedRole;
+        const initialRole: UserRole = isBootstrapSuperAdmin ? "superadmin" : "agent";
         const initialStatus: UserStatus = isBootstrapSuperAdmin ? "approved" : "pending";
 
         const newProfile: Omit<UserProfile, "createdAt" | "updatedAt"> = {
@@ -169,20 +160,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
           (err) => {
             console.error("Profile onSnapshot error:", err);
-            // Fallback for when Firestore rules block or API not yet enabled
-            const isBootstrap = Boolean(
-              currentUser.email &&
-                BOOTSTRAP_SUPERADMIN_EMAILS.some(
-                  (e) => e.toLowerCase() === currentUser.email?.toLowerCase()
-                )
-            );
+            // Fail closed: never grant elevated access when the profile can't be read.
             setProfile({
               uid: currentUser.uid,
               email: currentUser.email,
               displayName: currentUser.displayName,
               photoURL: currentUser.photoURL,
-              role: isBootstrap ? "superadmin" : "agent",
-              status: isBootstrap ? "approved" : "pending",
+              role: "agent",
+              status: "pending",
             });
             setLoading(false);
           }
@@ -219,14 +204,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Approval gating: Only approved users with crm:create permission can create CRM records
   const canCreateCRM = isApproved && hasPermission("crm:create");
 
-  const signInWithGoogle = async () => {
-    const result = await signInWithPopup(auth, googleProvider);
-    if (result.user) {
-      await syncUserToFirestore(result.user);
-    }
-    return result;
-  };
-
   const signInWithEmail = async (email: string, pass: string) => {
     const result = await signInWithEmailAndPassword(auth, email, pass);
     if (result.user) {
@@ -235,37 +212,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result;
   };
 
-  const signUpWithEmail = async (email: string, pass: string, requestedRole: UserRole = "agent") => {
-    const result = await createUserWithEmailAndPassword(auth, email, pass);
-    if (result.user) {
-      await syncUserToFirestore(result.user, requestedRole);
-    }
-    return result;
-  };
-
   const logout = async () => {
     await signOut(auth);
     setProfile(null);
-  };
-
-  const claimSuperadminRole = async () => {
-    if (!user) return;
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        role: "superadmin",
-        status: "approved",
-        approvedBy: "SELF_CLAIM_DEV",
-        approvedAt: new Date().toISOString(),
-        updatedAt: serverTimestamp(),
-      });
-    } catch (err) {
-      console.error("Failed to claim superadmin:", err);
-      // Local optimistic update
-      if (profile) {
-        setProfile({ ...profile, role: "superadmin", status: "approved" });
-      }
-    }
   };
 
   return (
@@ -281,11 +230,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isApproved,
         canCreateCRM,
         hasPermission,
-        signInWithGoogle,
         signInWithEmail,
-        signUpWithEmail,
         logout,
-        claimSuperadminRole,
       }}
     >
       {children}

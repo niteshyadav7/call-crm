@@ -6,6 +6,8 @@ import { db } from "@/lib/firebase";
 import {
   collection,
   onSnapshot,
+  query,
+  where,
   doc,
   updateDoc,
   setDoc,
@@ -18,8 +20,11 @@ import {
   RoleDefinition,
   Permission,
   SYSTEM_ROLES,
+  SyncedCallLog,
 } from "@/types/rbac";
 import { RbacSidebar, RbacTab } from "./rbac-sidebar";
+import { AgentsOverview } from "@/components/crm/agents-overview";
+import { CallLogsTable } from "@/components/crm/call-logs-table";
 import {
   PanelLeft,
   Users,
@@ -32,7 +37,6 @@ import {
   Bell,
   Download,
   AlertCircle,
-  Sparkles,
   ShieldAlert,
   Key,
 } from "lucide-react";
@@ -48,14 +52,18 @@ const AVAILABLE_PERMISSIONS: { id: Permission; label: string; desc: string }[] =
 ];
 
 export function RbacPortal() {
-  const { user, profile, isSuperAdmin, isApproved, claimSuperadminRole } = useAuth();
+  const { user, profile, isSuperAdmin, isApproved } = useAuth();
 
-  const [currentTab, setCurrentTab] = useState<RbacTab>("approvals");
+  const [currentTab, setCurrentTab] = useState<RbacTab>(
+    isSuperAdmin ? "agents" : "mycalls"
+  );
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const [usersList, setUsersList] = useState<UserProfile[]>([]);
   const [customRoles, setCustomRoles] = useState<RoleDefinition[]>([]);
+  const [callLogsList, setCallLogsList] = useState<SyncedCallLog[]>([]);
+  const [selectedAgentUidForLogs, setSelectedAgentUidForLogs] = useState<string | null>(null);
   const [userSearch, setUserSearch] = useState("");
 
   // Role Creation Modal
@@ -64,10 +72,68 @@ export function RbacPortal() {
   const [newRoleDesc, setNewRoleDesc] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(["crm:create"]);
 
-  // Real-time listener for users
+  // Automatically update active tab when role loads
   useEffect(() => {
+    if (isSuperAdmin && currentTab === "mycalls") {
+      setCurrentTab("agents");
+    } else if (!isSuperAdmin && (currentTab === "agents" || currentTab === "calllogs")) {
+      setCurrentTab("mycalls");
+    }
+  }, [isSuperAdmin]);
+
+  // Real-time listener for call logs
+  useEffect(() => {
+    if (!user) return;
     try {
-      const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+      const callLogsQuery = isSuperAdmin
+        ? collection(db, "callLogs")
+        : query(collection(db, "callLogs"), where("ownerUid", "==", user.uid));
+
+      const unsubscribe = onSnapshot(
+        callLogsQuery,
+        (snapshot) => {
+          const logs: SyncedCallLog[] = [];
+          snapshot.forEach((docSnap) => {
+            const d = docSnap.data();
+            logs.push({
+              id: docSnap.id,
+              ownerUid: d.ownerUid || "",
+              ownerName: d.ownerName || "",
+              ownerEmail: d.ownerEmail || "",
+              number: d.number || "",
+              normalizedNumber: d.normalizedNumber || d.number,
+              contactName: d.contactName || "",
+              type: typeof d.type === "number" ? d.type : 1,
+              duration: typeof d.duration === "number" ? d.duration : 0,
+              timestamp: typeof d.timestamp === "number" ? d.timestamp : Date.now(),
+              simSlot: typeof d.simSlot === "number" ? d.simSlot : 0,
+              isWhatsapp: Boolean(d.isWhatsapp),
+              syncedAt: d.syncedAt,
+            });
+          });
+          // Sort descending by timestamp
+          logs.sort((a, b) => b.timestamp - a.timestamp);
+          setCallLogsList(logs);
+        },
+        (err) => {
+          console.warn("Call logs sync error:", err);
+        }
+      );
+      return () => unsubscribe();
+    } catch (err) {
+      console.warn("Call logs listener failed:", err);
+    }
+  }, [user, isSuperAdmin]);
+
+  // Real-time listener for users (Super Admin only — rules deny everyone else)
+  useEffect(() => {
+    if (!isSuperAdmin) {
+      setUsersList([]);
+      return;
+    }
+    const unsubscribe = onSnapshot(
+      collection(db, "users"),
+      (snapshot) => {
         const list: UserProfile[] = [];
         snapshot.forEach((docSnap) => {
           const d = docSnap.data();
@@ -83,17 +149,18 @@ export function RbacPortal() {
           });
         });
         setUsersList(list);
-      });
-      return () => unsubscribe();
-    } catch (err) {
-      console.warn("Users sync error:", err);
-    }
-  }, []);
+      },
+      (err) => console.warn("Users sync error:", err)
+    );
+    return () => unsubscribe();
+  }, [isSuperAdmin]);
 
   // Real-time listener for custom roles
   useEffect(() => {
-    try {
-      const unsubscribe = onSnapshot(collection(db, "roles"), (snapshot) => {
+    if (!user) return;
+    const unsubscribe = onSnapshot(
+      collection(db, "roles"),
+      (snapshot) => {
         const list: RoleDefinition[] = [];
         snapshot.forEach((docSnap) => {
           const d = docSnap.data();
@@ -107,12 +174,11 @@ export function RbacPortal() {
           });
         });
         setCustomRoles(list);
-      });
-      return () => unsubscribe();
-    } catch (err) {
-      console.warn("Custom roles sync:", err);
-    }
-  }, []);
+      },
+      (err) => console.warn("Custom roles sync:", err)
+    );
+    return () => unsubscribe();
+  }, [user]);
 
   // Super Admin actions
   const handleApprove = async (targetUid: string) => {
@@ -219,10 +285,16 @@ export function RbacPortal() {
             </button>
 
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-slate-400 font-medium">RBAC System</span>
+              <span className="text-slate-400 font-medium">Call CRM</span>
               <span className="text-slate-300">/</span>
               <span className="font-semibold text-[#1a1c1c] capitalize">
-                {currentTab === "approvals"
+                {currentTab === "agents"
+                  ? "Agents Overview & Sync"
+                  : currentTab === "calllogs"
+                  ? "All Team Call Logs"
+                  : currentTab === "mycalls"
+                  ? "My Call Logs"
+                  : currentTab === "approvals"
                   ? "User Approvals"
                   : currentTab === "roles"
                   ? "Roles & Permissions"
@@ -287,16 +359,41 @@ export function RbacPortal() {
                   Your account status is currently <strong>PENDING</strong>. A Super Admin must approve your account before elevated permissions are granted.
                 </p>
               </div>
-              <button
-                onClick={claimSuperadminRole}
-                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-lg text-xs transition-colors shrink-0 cursor-pointer"
-              >
-                Claim Super Admin (Dev)
-              </button>
             </div>
           )}
 
-          {/* TAB 1: USER APPROVALS */}
+          {/* TAB: AGENTS OVERVIEW (Superadmin) */}
+          {currentTab === "agents" && isSuperAdmin && (
+            <AgentsOverview
+              agents={usersList}
+              callLogs={callLogsList}
+              onSelectAgentForLogs={(agentUid) => {
+                setSelectedAgentUidForLogs(agentUid);
+                setCurrentTab("calllogs");
+              }}
+            />
+          )}
+
+          {/* TAB: ALL CALL LOGS (Superadmin) */}
+          {currentTab === "calllogs" && isSuperAdmin && (
+            <CallLogsTable
+              callLogs={callLogsList}
+              agents={usersList}
+              selectedAgentUid={selectedAgentUidForLogs}
+              onClearAgentFilter={() => setSelectedAgentUidForLogs(null)}
+              isSuperAdmin={true}
+            />
+          )}
+
+          {/* TAB: MY CALL LOGS (Agent / Individual User) */}
+          {currentTab === "mycalls" && (
+            <CallLogsTable
+              callLogs={callLogsList}
+              isSuperAdmin={false}
+            />
+          )}
+
+          {/* TAB: USER APPROVALS */}
           {currentTab === "approvals" && (
             <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-7 shadow-xs space-y-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
@@ -665,18 +762,6 @@ export function RbacPortal() {
                   </span>
                 </div>
               </div>
-
-              {!isSuperAdmin && (
-                <div className="pt-2">
-                  <button
-                    onClick={claimSuperadminRole}
-                    className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    Claim Super Admin (Dev Mode)
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </main>

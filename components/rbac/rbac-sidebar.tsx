@@ -13,7 +13,13 @@ import {
   Clock,
 } from "lucide-react";
 
-export type RbacTab = "approvals" | "roles" | "profile";
+export type RbacTab =
+  | "agents"
+  | "calllogs"
+  | "mycalls"
+  | "approvals"
+  | "roles"
+  | "profile";
 
 interface RbacSidebarProps {
   currentTab: RbacTab;
@@ -37,24 +43,48 @@ export function RbacSidebar({
   const { user, profile, isSuperAdmin, logout } = useAuth();
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
-  const navItems = [
-    {
-      id: "approvals" as RbacTab,
-      label: "User Approvals",
-      icon: Users,
-      badge: pendingCount > 0 ? pendingCount : null,
-    },
-    {
-      id: "roles" as RbacTab,
-      label: "Roles & Permissions",
-      icon: Shield,
-    },
-    {
-      id: "profile" as RbacTab,
-      label: "My Account & Status",
-      icon: UserCheck,
-    },
-  ];
+  // Dynamic navigation items based on role
+  const navItems = isSuperAdmin
+    ? [
+        {
+          id: "agents" as RbacTab,
+          label: "Agents Overview",
+          icon: Users,
+        },
+        {
+          id: "calllogs" as RbacTab,
+          label: "All Call Logs",
+          icon: Flame,
+        },
+        {
+          id: "approvals" as RbacTab,
+          label: "User Approvals",
+          icon: UserCheck,
+          badge: pendingCount > 0 ? pendingCount : null,
+        },
+        {
+          id: "roles" as RbacTab,
+          label: "Roles & Permissions",
+          icon: Shield,
+        },
+        {
+          id: "profile" as RbacTab,
+          label: "My Account",
+          icon: Clock,
+        },
+      ]
+    : [
+        {
+          id: "mycalls" as RbacTab,
+          label: "My Call Logs",
+          icon: Flame,
+        },
+        {
+          id: "profile" as RbacTab,
+          label: "My Account & Status",
+          icon: UserCheck,
+        },
+      ];
 
   const handleNavClick = (tab: RbacTab) => {
     onSelectTab(tab);
