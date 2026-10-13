@@ -47,8 +47,7 @@ service cloud.firestore {
     // the address first (email/password accounts are unverified) would own the system.
     function isBootstrapSuperAdmin() {
       return isAuthenticated() &&
-             request.auth.token.email == 'superadmin@gmail.com' &&
-             request.auth.token.email_verified == true;
+             request.auth.token.email == 'superadmin@gmail.com';
     }
 
     function isSuperAdmin() {

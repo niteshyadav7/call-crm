@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:superadmin": "node scripts/seed-superadmin.mjs",
+    "seed:dummy": "node scripts/seed-dummy-data.mjs"
   },
   "dependencies": {
     "firebase": "^13.0.0",
