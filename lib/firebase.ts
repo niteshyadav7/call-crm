@@ -11,6 +11,63 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:55048843204:web:66f6e44315a996dd3cbe91",
 };
 
+// Patch client-side fetch and XMLHttpRequest to prevent 'credentials: include' on firestore.googleapis.com
+// This prevents Chrome from blocking Google's 'Access-Control-Allow-Origin: *' response with CORS errors.
+if (typeof window !== "undefined") {
+  const win = window as any;
+  if (!win.__firestore_cors_patched) {
+    win.__firestore_cors_patched = true;
+
+    // 1. Patch fetch
+    const originalFetch = window.fetch;
+    window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
+      try {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+            ? input.href
+            : (input as Request)?.url || "";
+
+        if (url.includes("firestore.googleapis.com")) {
+          if (input instanceof Request) {
+            const patchedReq = new Request(input, {
+              ...init,
+              credentials: "omit",
+            });
+            return originalFetch.call(this, patchedReq);
+          }
+          return originalFetch.call(this, input, {
+            ...init,
+            credentials: "omit",
+          });
+        }
+      } catch {
+        // Fallback to original fetch
+      }
+      return originalFetch.call(this, input, init);
+    };
+
+    // 2. Patch XMLHttpRequest
+    const originalXhrOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (...args: any[]) {
+      try {
+        const url = args[1];
+        if (typeof url === "string" && url.includes("firestore.googleapis.com")) {
+          Object.defineProperty(this, "withCredentials", {
+            get: () => false,
+            set: () => {},
+            configurable: true,
+          });
+        }
+      } catch {
+        // Fallback
+      }
+      return (originalXhrOpen as any).apply(this, args);
+    };
+  }
+}
+
 // Initialize Firebase (SSR & HMR safe singleton)
 const isNewApp = getApps().length === 0;
 const app = isNewApp ? initializeApp(firebaseConfig) : getApp();
